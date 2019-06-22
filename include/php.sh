@@ -1,8 +1,8 @@
 # Copyright (C) 2013 - 2019 Teddysun <i@teddysun.com>
-# 
+#
 # This file is part of the LAMP script.
 #
-# LAMP is a powerful bash script for the installation of 
+# LAMP is a powerful bash script for the installation of
 # Apache + PHP + MySQL/MariaDB/Percona and so on.
 # You can install Apache + PHP + MySQL/MariaDB/Percona in an very easy way.
 # Just need to input numbers to choose what you want to install before installation.
@@ -22,15 +22,14 @@ php_preinstall_settings(){
 
 #Intall PHP
 install_php(){
-    if [ "${mysql}" != "do_not_install" ]; then
-        if [ "${php}" == "${php5_6_filename}" ]; then
-            with_mysql="--enable-mysqlnd --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-mysql-sock=/tmp/mysql.sock --with-pdo-mysql=mysqlnd"
-        else
-            with_mysql="--enable-mysqlnd --with-mysqli=mysqlnd --with-mysql-sock=/tmp/mysql.sock --with-pdo-mysql=mysqlnd"
-        fi
+
+    if [ "${php}" == "${php5_6_filename}" ]; then
+        with_mysql="--enable-mysqlnd --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-mysql-sock=/tmp/mysql.sock --with-pdo-mysql=mysqlnd"
     else
-        with_mysql=""
+        with_mysql="--enable-mysqlnd --with-mysqli=mysqlnd --with-mysql-sock=/tmp/mysql.sock --with-pdo-mysql=mysqlnd"
     fi
+
+
     if [ "${php}" == "${php5_6_filename}" ]; then
         with_gd="--with-gd --with-vpx-dir --with-jpeg-dir --with-png-dir --with-xpm-dir --with-freetype-dir"
     else
@@ -138,14 +137,25 @@ install_php(){
 
 
 config_php(){
+    local php_number=`ls ${depends_prefix}/|grep php|wc -l`
+    if [ ${php_number} -eq 0 ];then
+        rm -f /etc/php.ini /usr/bin/php /usr/bin/php-config /usr/bin/phpize
+        ln -s ${php_location}/etc/php.ini /etc/php.ini
+        ln -s ${php_location}/bin/php /usr/bin/
+        ln -s ${php_location}/bin/php-config /usr/bin/
+        ln -s ${php_location}/bin/phpize /usr/bin/
+    else
+        #自动修改 apache, 注释新增的板块支持
+        local base_php_version=`php -r "echo PHP_VERSION;" | awk -F . '{print $1}'`
+        if [[ "${php}" == "${php5_6_filename}" && "${base_php_version}" == 7 ]];then
+           awk '/php5_module/{$0="#"$0}1' ${apache_location}/conf/httpd.conf 1<>${apache_location}/conf/httpd.conf
+        fi
+        if [[ "${php}" != "${php5_6_filename}" && "${base_php_version}" == 5 ]]; then
+           awk '/php7_module/{$0="#"$0}1' ${apache_location}/conf/httpd.conf 1<>${apache_location}/conf/httpd.conf
+        fi
+    fi
 
-    rm -f /etc/php.ini /usr/bin/php /usr/bin/php-config /usr/bin/phpize
-    ln -s ${php_location}/etc/php.ini /etc/php.ini
-    ln -s ${php_location}/bin/php /usr/bin/
-    ln -s ${php_location}/bin/php-config /usr/bin/
-    ln -s ${php_location}/bin/phpize /usr/bin/
-
-    extension_dir=$(php-config --extension-dir)
+    extension_dir=$(${php_location}/bin/php-config --extension-dir)
     cat > ${php_location}/php.d/opcache.ini<<-EOF
 [opcache]
 zend_extension=${extension_dir}/opcache.so
@@ -157,10 +167,11 @@ opcache.revalidate_freq=60
 opcache.fast_shutdown=1
 opcache.save_comments=0
 EOF
-
-    cp -f ${cur_dir}/conf/ocp.php ${web_root_dir}/ocp.php
-    chown apache:apache ${web_root_dir}/ocp.php
-
+    if [ ${php_number} -eq 0 ];then
+        cp -f ${cur_dir}/conf/ocp.php ${web_root_dir}/ocp.php
+        chown apache:apache ${web_root_dir}/ocp.php
+    fi
+    #设置php.ini 对 mysql的配置
     if [[ -d "${mysql_data_location}" || -d "${mariadb_data_location}" || -d "${percona_data_location}" ]]; then
         sock_location=/tmp/mysql.sock
         sed -i "s#mysql.default_socket.*#mysql.default_socket = ${sock_location}#" ${php_location}/etc/php.ini
@@ -168,8 +179,11 @@ EOF
         sed -i "s#pdo_mysql.default_socket.*#pdo_mysql.default_socket = ${sock_location}#" ${php_location}/etc/php.ini
     fi
 
-    if [[ -d "${apache_location}" ]]; then
-        sed -i "s@AddType\(.*\)Z@AddType\1Z\n    AddType application/x-httpd-php .php .phtml\n    AddType appication/x-httpd-php-source .phps@" ${apache_location}/conf/httpd.conf
+    #设置 apache 支持 php
+    if [ ${php_number} -eq 0 ];then
+        if [[ -d "${apache_location}" ]]; then
+            sed -i "s@AddType\(.*\)Z@AddType\1Z\n    AddType application/x-httpd-php .php .phtml\n    AddType appication/x-httpd-php-source .phps@" ${apache_location}/conf/httpd.conf
+        fi
     fi
 
 }

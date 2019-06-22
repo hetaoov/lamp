@@ -1,8 +1,8 @@
 # Copyright (C) 2013 - 2019 Teddysun <i@teddysun.com>
-# 
+#
 # This file is part of the LAMP script.
 #
-# LAMP is a powerful bash script for the installation of 
+# LAMP is a powerful bash script for the installation of
 # Apache + PHP + MySQL/MariaDB/Percona and so on.
 # You can install Apache + PHP + MySQL/MariaDB/Percona in an very easy way.
 # Just need to input numbers to choose what you want to install before installation.
@@ -35,11 +35,11 @@ parallel_compile=1
 
 ##Software version
 #nghttp2
-nghttp2_filename="nghttp2-1.39.1"
-nghttp2_filename_url="https://github.com/nghttp2/nghttp2/releases/download/v1.39.1/nghttp2-1.39.1.tar.gz"
+nghttp2_filename="nghttp2-1.38.0"
+nghttp2_filename_url="https://github.com/nghttp2/nghttp2/releases/download/v1.38.0/nghttp2-1.38.0.tar.gz"
 #openssl
-openssl_filename="openssl-1.1.1c"
-openssl_filename_url="https://www.openssl.org/source/openssl-1.1.1c.tar.gz"
+openssl_filename="openssl-1.1.1b"
+openssl_filename_url="https://www.openssl.org/source/openssl-1.1.1b.tar.gz"
 #apache2.4
 apache2_4_filename="httpd-2.4.39"
 apache2_4_filename_url="http://ftp.jaist.ac.jp/pub/apache//httpd/httpd-2.4.39.tar.gz"
@@ -58,9 +58,9 @@ mariadb10_0_filename="mariadb-10.0.38"
 #mariadb10.1
 mariadb10_1_filename="mariadb-10.1.40"
 #mariadb10.2
-mariadb10_2_filename="mariadb-10.2.25"
+mariadb10_2_filename="mariadb-10.2.24"
 #mariadb10.3
-mariadb10_3_filename="mariadb-10.3.16"
+mariadb10_3_filename="mariadb-10.3.15"
 #percona5.5
 percona5_5_filename="Percona-Server-5.5.62-38.14"
 #percona5.6
@@ -133,9 +133,9 @@ libzip_filename_url="https://libzip.org/download/libzip-1.3.2.tar.gz"
 libiconv_filename="libiconv-1.15"
 libiconv_filename_url="https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.15.tar.gz"
 #swoole
-swoole_filename="swoole-src-4.3.5"
-swoole_filename_url="https://github.com/swoole/swoole-src/archive/v4.3.5.tar.gz"
-set_hint ${swoole_filename} "php-swoole-4.3.5"
+swoole_filename="swoole-src-4.3.4"
+swoole_filename_url="https://github.com/swoole/swoole-src/archive/v4.3.4.tar.gz"
+set_hint ${swoole_filename} "php-swoole-4.3.4"
 #yaf
 yaf_filename="yaf-3.0.8"
 yaf_filename_url="https://pecl.php.net/get/yaf-3.0.8.tgz"
@@ -242,6 +242,16 @@ ${php7_1_filename}
 ${php7_2_filename}
 ${php7_3_filename}
 do_not_install
+)
+
+#多版本php存放目录
+php_dir_arr=(
+${depends_prefix}/php@56
+${depends_prefix}/php@70
+${depends_prefix}/php@71
+${depends_prefix}/php@72
+${depends_prefix}/php@73
+${php_location}
 )
 
 phpmyadmin_arr=(

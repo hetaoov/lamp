@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Copyright (C) 2013 - 2019 Teddysun <i@teddysun.com>
-# 
+#
 # This file is part of the LAMP script.
 #
-# LAMP is a powerful bash script for the installation of 
+# LAMP is a powerful bash script for the installation of
 # Apache + PHP + MySQL/MariaDB/Percona and so on.
 # You can install Apache + PHP + MySQL/MariaDB/Percona in an very easy way.
 # Just need to input numbers to choose what you want to install before installation.
@@ -64,7 +64,7 @@ Options:
 --db_data_path [location]       Database Data Location. for example: /data/db
 --db_root_pwd [password]        Database root password. for example: lamp.sh
 --php_option [1-6]              PHP version
---php_extensions [ext name]     PHP extensions: 
+--php_extensions [ext name]     PHP extensions:
                                 ioncube, xcache, imagick,
                                 gmagick, memcached, redis,
                                 mongodb, libsodium, swoole,
@@ -128,6 +128,7 @@ process(){
             fi
             [[ "${php_option}" -lt 1 || "${php_option}" -gt 6 ]] && { log "Error" "php_option input error. please only input a number between 1 and 6"; exit 1; }
             eval php=${php_arr[${php_option}-1]}
+            eval php_location=${php_dir_arr[${php_option}-1]}
             ;;
         --php_extensions)
             php_extensions=$2
@@ -213,7 +214,7 @@ set_parameters(){
     [ "${apache}" == "do_not_install" ] && apache_modules_install="do_not_install"
 
     [ -z "${php_option}" ] && php="do_not_install"
-    [ "${apache}" == "do_not_install" ] && php="do_not_install"
+  #  [ "${apache}" == "do_not_install" ] && php="do_not_install"
     [ -z "${php_extensions}" ] && php_modules_install="do_not_install"
     [ -z "${php_modules_install}" ] && php_modules_install="do_not_install"
     [ "${php}" == "do_not_install" ] && php_modules_install="do_not_install"
@@ -248,6 +249,11 @@ set_parameters(){
     [ "${php}" == "do_not_install" ] && phpmyadmin="do_not_install"
     [ -z "${kodexplorer_option}" ] && kodexplorer="do_not_install"
     [ "${php}" == "do_not_install" ] && kodexplorer="do_not_install"
+
+#    echo ${php_location}
+#    echo ${php_option}
+#    echo ${php}
+#    exit
 
     phpConfig=${php_location}/bin/php-config
 }
